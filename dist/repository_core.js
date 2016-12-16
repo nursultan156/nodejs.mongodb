@@ -1,6 +1,8 @@
 /**
  * Created by n on 12.12.2016.
  */
+var GridFSBucket = require('mongodb').GridFSBucket;
+var fs = require('fs');
 
 var repository_core = function (connector) {
 
@@ -403,6 +405,60 @@ var repository_core = function (connector) {
         else {
             reconnect(createIndex, payload, callback);
         }
+
+    };
+
+
+    var uploadFile = function (payload, callback) {
+
+        /**
+         * payload = {
+         *  document:{
+         *      fileName:fileName
+         *      fileOptions:fileOptions
+         *      filePath:filePath
+         *  }
+         *  options:options
+         * }
+         */
+
+        payloadExtract(payload);
+
+        if (!_document || !_document.filePath || !fs.existsSync(_document.filePath)) return callback('payload error', null);
+
+        if (_connector.isConnected()) {
+
+            var bucket = new GridFSBucket(_connector.db());
+            var uploadStream = bucket.openUploadStream(_document && _document.fileName ? _document.fileName : null, _document && _document.fileOptions ? _document.fileOptions : null);
+            var readStream = fs.createReadStream(_document.filePath);
+
+            readStream.pipe(uploadStream)
+                .on('error', function (err) {
+                    if (isDbConnectionProblem(err)) {
+                        reconnect(uploadFile, payload, callback);
+                    }
+                    else {
+                        callback(err, null);
+                    }
+                })
+                .on('finish', function () {
+                    callback(null, uploadStream.id);
+                });
+
+        }
+        else {
+            reconnect(uploadFile, payload, callback);
+        }
+
+    };
+    var downloadFile = function (payload, callback) {
+
+        /**
+         * payload = {
+         *  query:query
+         *  options:options
+         * }
+         */
 
     };
 

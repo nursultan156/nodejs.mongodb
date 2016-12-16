@@ -15,71 +15,99 @@ var d2_1 = null;
 var d2_2 = null;
 
 async.series([
+        //function (callback) {
+        //    d1_1 = new Date();
+        //    var count = 0;
+        //    async.whilst(
+        //        function () {
+        //            return count < 1000000;
+        //        },
+        //        function (callback) {
+        //            count++;
+        //
+        //            var payload = {
+        //                collectionName: 'c1',
+        //                document: {
+        //                    a: 1,
+        //                    b: 2
+        //                }
+        //            };
+        //
+        //            r1.createOne(payload, function (err, res) {
+        //                if (err) return callback(err);
+        //                console.log(count);
+        //                callback(null);
+        //            });
+        //
+        //        },
+        //        function (err, n) {
+        //            d1_2 = new Date();
+        //            if (err) return callback(err);
+        //            callback(null);
+        //        }
+        //    );
+        //
+        //},
+        //function (callback) {
+        //    d2_1 = new Date();
+        //    var count = 0;
+        //    async.whilst(
+        //        function () {
+        //            return count < 1000000;
+        //        },
+        //        function (callback) {
+        //            count++;
+        //
+        //            var payload = {
+        //                collectionName: 'c2',
+        //                document: {
+        //                    a: 1,
+        //                    b: 2
+        //                }
+        //            };
+        //
+        //            r2.createOne(payload, function (err, res) {
+        //                if (err) return callback(err);
+        //                console.log(count);
+        //                callback(null);
+        //            });
+        //
+        //        },
+        //        function (err, n) {
+        //            d2_2 = new Date();
+        //            if (err) return callback(err);
+        //            callback(null);
+        //        }
+        //    );
+        //
+        //},
+
         function (callback) {
-            d1_1 = new Date();
-            var count = 0;
-            async.whilst(
-                function () {
-                    return count < 1000000;
+
+            var payload = {
+                document: {
+                    fileName:'filename',
+                    fileOptions:{
+                        chunkSizeBytes:255*1024,
+                        metadata:{},
+                        contentType:'',
+                        aliases:[]
+                    },
+                    filePath:'filepath'
                 },
-                function (callback) {
-                    count++;
-
-                    var payload = {
-                        collectionName: 'c1',
-                        document: {
-                            a: 1,
-                            b: 2
-                        }
-                    };
-
-                    r1.createOne(payload, function (err, res) {
-                        if (err) return callback(err);
-                        console.log(count);
-                        callback(null);
-                    });
-
+                query:{
+                    _id:'_id'
                 },
-                function (err, n) {
-                    d1_2 = new Date();
-                    if (err) return callback(err);
-                    callback(null);
+                options: {
+                    bucketName:'fs',
+                    chunkSizeBytes:255*1024
                 }
-            );
+            };
 
-        },
-        function (callback) {
-            d2_1 = new Date();
-            var count = 0;
-            async.whilst(
-                function () {
-                    return count < 1000000;
-                },
-                function (callback) {
-                    count++;
-
-                    var payload = {
-                        collectionName: 'c2',
-                        document: {
-                            a: 1,
-                            b: 2
-                        }
-                    };
-
-                    r2.createOne(payload, function (err, res) {
-                        if (err) return callback(err);
-                        console.log(count);
-                        callback(null);
-                    });
-
-                },
-                function (err, n) {
-                    d2_2 = new Date();
-                    if (err) return callback(err);
-                    callback(null);
-                }
-            );
-
+            r1.uploadFile(payload, function (err, res) {
+                if(err) return callback(err);
+                callback(null);
+            });
         }
     ],
     function (err, res) {
