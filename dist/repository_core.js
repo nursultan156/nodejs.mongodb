@@ -428,7 +428,7 @@ var repository_core = function (connector) {
 
         if (_connector.isConnected()) {
 
-            var bucket = new GridFSBucket(_connector.db());
+            var bucket = new GridFSBucket(_connector.db(), _options);
             var uploadStream = bucket.openUploadStream(_document && _document.fileName ? _document.fileName : null, _document && _document.fileOptions ? _document.fileOptions : null);
             var readStream = fs.createReadStream(_document.filePath);
 
@@ -528,6 +528,9 @@ var repository_core = function (connector) {
     };
     this.createIndex = function (payload, callback) {
         createIndex(payload, callback);
+    };
+    this.uploadFile = function (payload, callback) {
+        uploadFile(payload, callback);
     };
 
 };

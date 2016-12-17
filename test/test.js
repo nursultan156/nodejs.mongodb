@@ -3,6 +3,7 @@
  */
 var repository = require('../dist/repository');
 var async = require('async');
+var path = require('path');
 
 var r1 = repository.new('mongodb://localhost:27017/t1', {server: {socketOptions: {socketTimeoutMS: 1000 * 600}}});
 var r2 = repository.new('mongodb://localhost:27017/t2', {server: {socketOptions: {socketTimeoutMS: 1000 * 600}}});
@@ -48,6 +49,7 @@ async.series([
         //    );
         //
         //},
+
         //function (callback) {
         //    d2_1 = new Date();
         //    var count = 0;
@@ -86,14 +88,17 @@ async.series([
 
             var payload = {
                 document: {
-                    fileName:'filename',
+                    fileName:'',
                     fileOptions:{
                         chunkSizeBytes:255*1024,
-                        metadata:{},
+                        metadata:{
+                            asd:1,
+                            sdf:5
+                        },
                         contentType:'',
                         aliases:[]
                     },
-                    filePath:'filepath'
+                    filePath: path.join(__dirname, './Новый текстовый документ.txt')
                 },
                 query:{
                     _id:'_id'
@@ -106,6 +111,7 @@ async.series([
 
             r1.uploadFile(payload, function (err, res) {
                 if(err) return callback(err);
+                console.log(res);
                 callback(null);
             });
         }
