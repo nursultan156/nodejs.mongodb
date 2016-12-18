@@ -58,9 +58,13 @@ var repository = function (url, options) {
         inst.createIndex(payload, callback);
     };
 
-    this.uploadFile = function(payload, callback){
+    this.uploadFile = function (payload, callback) {
         var inst = new repository_core(_connector);
         inst.uploadFile(payload, callback);
+    };
+    this.downloadFile = function (payload, callback) {
+        var inst = new repository_core(_connector);
+        inst.downloadFile(payload, callback);
     };
 
 };

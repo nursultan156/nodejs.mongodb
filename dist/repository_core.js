@@ -407,8 +407,6 @@ var repository_core = function (connector) {
         }
 
     };
-
-
     var uploadFile = function (payload, callback) {
 
         /**
@@ -459,6 +457,22 @@ var repository_core = function (connector) {
          *  options:options
          * }
          */
+
+        payloadExtract(payload);
+
+        if (!_query) return callback('payload error', null);
+
+        if (_connector.isConnected()) {
+
+            var bucket = new GridFSBucket(_connector.db(), _options);
+            var downloadStream = bucket.openDownloadStream(_query && _query._id ? _query._id : null);
+
+            callback(null, downloadStream);
+
+        }
+        else {
+            reconnect(downloadFile, payload, callback);
+        }
 
     };
 
@@ -531,6 +545,9 @@ var repository_core = function (connector) {
     };
     this.uploadFile = function (payload, callback) {
         uploadFile(payload, callback);
+    };
+    this.downloadFile = function (payload, callback) {
+        downloadFile(payload, callback);
     };
 
 };
