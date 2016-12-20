@@ -14,7 +14,7 @@ var repository_core = function (connector) {
     /**
      * _collectionName: string
      */
-    var _collectionName = null; //CRUD [CRUD] COUNT AGGREGATE CREATE-INDEX UPLOAD-FILE DOWNLOAD-FILE
+    var _collectionName = null; //CRUD [CRUD] COUNT AGGREGATE CREATE-INDEX ----------- -------------
     /**
      * _document: {}
      */
