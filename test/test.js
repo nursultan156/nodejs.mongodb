@@ -4,6 +4,8 @@
 var repository = require('../dist/repository');
 var async = require('async');
 var path = require('path');
+var fs = require('fs');
+var ObjectID = require('mongodb').ObjectID;
 
 var r1 = repository.new('mongodb://localhost:27017/t1', {server: {socketOptions: {socketTimeoutMS: 1000 * 600}}});
 var r2 = repository.new('mongodb://localhost:27017/t2', {server: {socketOptions: {socketTimeoutMS: 1000 * 600}}});
@@ -87,22 +89,18 @@ async.series([
         function (callback) {
 
             var payload = {
-                document: {
-                    fileName:'',
-                    fileOptions:{
-                        chunkSizeBytes:255*1024,
-                        metadata:{
-                            asd:1,
-                            sdf:5
-                        },
-                        contentType:'',
-                        aliases:[]
+                fileName:'',
+                fileOptions:{
+                    chunkSizeBytes:255*1024,
+                    metadata:{
+                        asd:1,
+                        sdf:5
                     },
-                    filePath: path.join(__dirname, './Новый текстовый документ.txt')
+                    contentType:'',
+                    aliases:[]
                 },
-                query:{
-                    _id:'_id'
-                },
+                filePath: path.join(__dirname, './Новый текстовый документ.txt'),
+                fileId: new ObjectID('58592eca62cf5f15a02a6414'),
                 options: {
                     bucketName:'fs',
                     chunkSizeBytes:255*1024
@@ -113,6 +111,22 @@ async.series([
                 if(err) return callback(err);
                 console.log(res);
                 callback(null);
+
+            });
+
+
+            r1.downloadFile(payload, function (err, res) {
+                if(err) return callback(err);
+
+                var writeStream = fs.createWriteStream(path.join(__dirname, './Новый текстовый документ55.txt'));
+                res.pipe(writeStream)
+                    .on('error', function (err) {
+                        return callback(err);
+                    })
+                    .on('finish', function () {
+                        callback(null);
+                    });
+
             });
         }
     ],

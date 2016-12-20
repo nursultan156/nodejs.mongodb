@@ -14,27 +14,27 @@ var repository_core = function (connector) {
     /**
      * _collectionName: string
      */
-    var _collectionName = null; //CRUD [CRUD] COUNT AGGREGATE CREATE-INDEX
+    var _collectionName = null; //CRUD [CRUD] COUNT AGGREGATE CREATE-INDEX UPLOAD-FILE DOWNLOAD-FILE
     /**
      * _document: {}
      */
-    var _document = null;       //C--- [----] ----- --------- CREATE-INDEX
+    var _document = null;       //C--- [----] ----- --------- CREATE-INDEX ----------- -------------
     /**
      * _query: {}
      */
-    var _query = null;          //-RUD [-RUD] COUNT --------- ------------
+    var _query = null;          //-RUD [-RUD] COUNT --------- ------------ ----------- -------------
     /**
      * _update: {}
      */
-    var _update = null;         //--U- [--U-] ----- --------- ------------
+    var _update = null;         //--U- [--U-] ----- --------- ------------ ----------- -------------
     /**
      * _options: {}
      */
-    var _options = null;        //C-UD [C-UD] COUNT AGGREGATE CREATE-INDEX
+    var _options = null;        //C-UD [C-UD] COUNT AGGREGATE CREATE-INDEX UPLOAD-FILE DOWNLOAD-FILE
     /**
      * _documentsList: []
      */
-    var _documentsList = null;  //---- [C---] ----- --------- ------------
+    var _documentsList = null;  //---- [C---] ----- --------- ------------ ----------- -------------
     /**
      * _cursorOptions: {
      *      project: {},
@@ -44,12 +44,27 @@ var repository_core = function (connector) {
      *      toArray: bool
      * }
      */
-    var _cursorOptions = null;  //---- [-R--] ----- AGGREGATE ------------
+    var _cursorOptions = null;  //---- [-R--] ----- AGGREGATE ------------ ----------- -------------
     /**
      * _pipeline: []
      */
-    var _pipeline = null;       //---- [----] ----- AGGREGATE ------------
-    //var _requestId = null;    //---- [----] ----- --------- ------------
+    var _pipeline = null;       //---- [----] ----- AGGREGATE ------------ ----------- -------------
+    /**
+     * _fileName: string
+     */
+    var _fileName = null;       //---- [----] ----- --------- ------------ UPLOAD-FILE -------------
+    /**
+     * _fileOptions: {}
+     */
+    var _fileOptions = null;    //---- [----] ----- --------- ------------ UPLOAD-FILE DOWNLOAD-FILE
+    /**
+     * _filePath: string
+     */
+    var _filePath = null;       //---- [----] ----- --------- ------------ UPLOAD-FILE -------------
+    /**
+     * _fileId: ObjectID
+     */
+    var _fileId = null;         //---- [----] ----- --------- ------------ ----------- DOWNLOAD-FILE
 
 
     //private functions
@@ -68,8 +83,11 @@ var repository_core = function (connector) {
         _documentsList = payload && payload.documentsList ? payload.documentsList : null;
         _cursorOptions = payload && payload.cursorOptions ? payload.cursorOptions : null;
         _pipeline = payload && payload.pipeline ? payload.pipeline : null;
-        //_requestId = payload && (payload.requestId || payload.requestId == 0) ? payload.requestId : null;
-        //_filter = payload && payload.filter ? payload.filter : null;
+        _fileName = payload && payload.fileName ? payload.fileName : null;
+        _fileOptions = payload && payload.fileOptions ? payload.fileOptions : null;
+        _filePath = payload && payload.filePath ? payload.filePath : null;
+        _fileId = payload && payload.fileId ? payload.fileId : null;
+
     };
     var isDbConnectionProblem = function (err) {
         if (err && err.message && err.message.indexOf('topology was destroyed') != -1) {
@@ -409,26 +427,15 @@ var repository_core = function (connector) {
     };
     var uploadFile = function (payload, callback) {
 
-        /**
-         * payload = {
-         *  document:{
-         *      fileName:fileName
-         *      fileOptions:fileOptions
-         *      filePath:filePath
-         *  }
-         *  options:options
-         * }
-         */
-
         payloadExtract(payload);
 
-        if (!_document || !_document.filePath || !fs.existsSync(_document.filePath)) return callback('payload error', null);
+        if (!_filePath || !fs.existsSync(_filePath)) return callback('payload error', null);
 
         if (_connector.isConnected()) {
 
             var bucket = new GridFSBucket(_connector.db(), _options);
-            var uploadStream = bucket.openUploadStream(_document && _document.fileName ? _document.fileName : null, _document && _document.fileOptions ? _document.fileOptions : null);
-            var readStream = fs.createReadStream(_document.filePath);
+            var uploadStream = bucket.openUploadStream(_fileName, _fileOptions);
+            var readStream = fs.createReadStream(_filePath);
 
             readStream.pipe(uploadStream)
                 .on('error', function (err) {
@@ -451,21 +458,14 @@ var repository_core = function (connector) {
     };
     var downloadFile = function (payload, callback) {
 
-        /**
-         * payload = {
-         *  query:query
-         *  options:options
-         * }
-         */
-
         payloadExtract(payload);
 
-        if (!_query) return callback('payload error', null);
+        if (!_fileId) return callback('payload error', null);
 
         if (_connector.isConnected()) {
 
             var bucket = new GridFSBucket(_connector.db(), _options);
-            var downloadStream = bucket.openDownloadStream(_query && _query._id ? _query._id : null);
+            var downloadStream = bucket.openDownloadStream(_fileId, _fileOptions);
 
             callback(null, downloadStream);
 
