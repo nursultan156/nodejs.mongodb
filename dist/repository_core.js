@@ -93,6 +93,9 @@ var repository_core = function (connector) {
         if (err && err.message && err.message.indexOf('topology was destroyed') != -1) {
             return true;
         }
+        else if (err && err.message && err.message.indexOf('Topology was destroyed') != -1) {
+            return true;
+        }
         else if (err && err.message && err.message.indexOf('ECONNRESET') != -1) {
             return true;
         }
